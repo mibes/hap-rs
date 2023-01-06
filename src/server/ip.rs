@@ -263,7 +263,7 @@ impl Server for IpServer {
         self.accessory_database
             .lock()
             .await
-            .remove_accessory(&accessory)
+            .remove_accessory(accessory)
             .await?;
 
         let mut aid_cache = self.aid_cache.lock().await;

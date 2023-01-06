@@ -51,9 +51,9 @@ impl SlatsService {
         Self {
             id,
             hap_type: HapType::Slats,
-			current_slat_state: CurrentSlatStateCharacteristic::new(id + 1 + 0, accessory_id),
+			current_slat_state: CurrentSlatStateCharacteristic::new(id + 1, accessory_id),
 			slat_type: SlatTypeCharacteristic::new(id + 1 + 1, accessory_id),
-			name: Some(NameCharacteristic::new(id + 1 + 0 + 2, accessory_id)),
+			name: Some(NameCharacteristic::new(id + 1 + 2, accessory_id)),
 			swing_mode: Some(SwingModeCharacteristic::new(id + 1 + 1 + 2, accessory_id)),
 			current_tilt_angle: Some(CurrentTiltAngleCharacteristic::new(id + 1 + 2 + 2, accessory_id)),
 			target_tilt_angle: Some(TargetTiltAngleCharacteristic::new(id + 1 + 3 + 2, accessory_id)),
@@ -104,21 +104,11 @@ impl HapService for SlatsService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

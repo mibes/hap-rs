@@ -72,12 +72,12 @@ impl AccessoryInformationService {
         Self {
             id,
             hap_type: HapType::AccessoryInformation,
-			identify: IdentifyCharacteristic::new(id + 1 + 0, accessory_id),
+			identify: IdentifyCharacteristic::new(id + 1, accessory_id),
 			manufacturer: ManufacturerCharacteristic::new(id + 1 + 1, accessory_id),
 			model: ModelCharacteristic::new(id + 1 + 2, accessory_id),
 			name: NameCharacteristic::new(id + 1 + 3, accessory_id),
 			serial_number: SerialNumberCharacteristic::new(id + 1 + 4, accessory_id),
-			accessory_flags: Some(AccessoryFlagsCharacteristic::new(id + 1 + 0 + 5, accessory_id)),
+			accessory_flags: Some(AccessoryFlagsCharacteristic::new(id + 1 + 5, accessory_id)),
 			application_matching_identifier: Some(ApplicationMatchingIdentifierCharacteristic::new(id + 1 + 1 + 5, accessory_id)),
 			configured_name: Some(ConfiguredNameCharacteristic::new(id + 1 + 2 + 5, accessory_id)),
 			firmware_revision: Some(FirmwareRevisionCharacteristic::new(id + 1 + 3 + 5, accessory_id)),
@@ -132,21 +132,11 @@ impl HapService for AccessoryInformationService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

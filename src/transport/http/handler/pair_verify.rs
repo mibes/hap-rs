@@ -72,19 +72,13 @@ impl TlvHandlerExt for PairVerify {
                     x if x == StepNumber::StartReq as u8 => {
                         let a_pub = decoded
                             .remove(&(Type::PublicKey as u8))
-                            .ok_or(tlv::ErrorContainer::new(
-                                StepNumber::StartRes as u8,
-                                tlv::Error::Unknown,
-                            ))?;
+                            .ok_or_else(|| tlv::ErrorContainer::new(StepNumber::StartRes as u8, tlv::Error::Unknown))?;
                         Ok(Step::Start { a_pub })
                     },
                     x if x == StepNumber::FinishReq as u8 => {
-                        let data = decoded
-                            .remove(&(Type::EncryptedData as u8))
-                            .ok_or(tlv::ErrorContainer::new(
-                                StepNumber::FinishRes as u8,
-                                tlv::Error::Unknown,
-                            ))?;
+                        let data = decoded.remove(&(Type::EncryptedData as u8)).ok_or_else(|| {
+                            tlv::ErrorContainer::new(StepNumber::FinishRes as u8, tlv::Error::Unknown)
+                        })?;
                         Ok(Step::Finish { data })
                     },
                     _ => Err(tlv::ErrorContainer::new(StepNumber::Unknown as u8, tlv::Error::Unknown)),
@@ -174,7 +168,7 @@ async fn handle_start(
     let mut encrypted_data = Vec::new();
     encrypted_data.extend_from_slice(&encoded_sub_tlv);
     let auth_tag = aead.encrypt_in_place_detached(GenericArray::from_slice(&nonce), &[], &mut encrypted_data)?;
-    encrypted_data.extend(&auth_tag);
+    encrypted_data.extend(auth_tag);
 
     info!("pair verify M2: sending verify start response");
 

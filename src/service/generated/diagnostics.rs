@@ -42,8 +42,8 @@ impl DiagnosticsService {
         Self {
             id,
             hap_type: HapType::Diagnostics,
-			supported_diagnostics_snapshot: SupportedDiagnosticsSnapshotCharacteristic::new(id + 1 + 0, accessory_id),
-			selected_diagnostics_modes: Some(SelectedDiagnosticsModesCharacteristic::new(id + 1 + 0 + 1, accessory_id)),
+			supported_diagnostics_snapshot: SupportedDiagnosticsSnapshotCharacteristic::new(id + 1, accessory_id),
+			selected_diagnostics_modes: Some(SelectedDiagnosticsModesCharacteristic::new(id + 1 + 1, accessory_id)),
 			supported_diagnostics_modes: Some(SupportedDiagnosticsModesCharacteristic::new(id + 1 + 1 + 1, accessory_id)),
 			..Default::default()
         }
@@ -92,21 +92,11 @@ impl HapService for DiagnosticsService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

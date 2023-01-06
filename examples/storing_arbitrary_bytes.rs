@@ -49,8 +49,8 @@ async fn main() -> Result<()> {
 
     let state = Arc::new(Mutex::new(match storage.load_bytes("state.json").await {
         Ok(state_bytes) => {
-            let state = serde_json::from_slice(&state_bytes)?;
-            state
+            
+            serde_json::from_slice(&state_bytes)?
         },
         Err(_) => {
             let state = LightbulbState { power_state: false };
@@ -94,7 +94,7 @@ async fn main() -> Result<()> {
                     storage.lock().await.save_bytes("state.json", &state_bytes).await?;
                 }
 
-                println!("power_state characteristic updated from {} to {}", current_val, new_val);
+                println!("power_state characteristic updated from {current_val} to {new_val}");
 
                 Ok(())
             }

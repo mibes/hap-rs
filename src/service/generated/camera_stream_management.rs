@@ -54,13 +54,13 @@ impl CameraStreamManagementService {
         Self {
             id,
             hap_type: HapType::CameraStreamManagement,
-			selected_stream_configuration: SelectedStreamConfigurationCharacteristic::new(id + 1 + 0, accessory_id),
+			selected_stream_configuration: SelectedStreamConfigurationCharacteristic::new(id + 1, accessory_id),
 			setup_endpoint: SetupEndpointCharacteristic::new(id + 1 + 1, accessory_id),
 			streaming_status: StreamingStatusCharacteristic::new(id + 1 + 2, accessory_id),
 			supported_audio_stream_configuration: SupportedAudioStreamConfigurationCharacteristic::new(id + 1 + 3, accessory_id),
 			supported_rtp_configuration: SupportedRtpConfigurationCharacteristic::new(id + 1 + 4, accessory_id),
 			supported_video_stream_configuration: SupportedVideoStreamConfigurationCharacteristic::new(id + 1 + 5, accessory_id),
-			active: Some(ActiveCharacteristic::new(id + 1 + 0 + 6, accessory_id)),
+			active: Some(ActiveCharacteristic::new(id + 1 + 6, accessory_id)),
 			..Default::default()
         }
     }
@@ -108,21 +108,11 @@ impl HapService for CameraStreamManagementService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

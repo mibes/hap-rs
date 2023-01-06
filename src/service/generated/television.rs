@@ -72,12 +72,12 @@ impl TelevisionService {
         Self {
             id,
             hap_type: HapType::Television,
-			active: ActiveCharacteristic::new(id + 1 + 0, accessory_id),
+			active: ActiveCharacteristic::new(id + 1, accessory_id),
 			active_identifier: ActiveIdentifierCharacteristic::new(id + 1 + 1, accessory_id),
 			configured_name: ConfiguredNameCharacteristic::new(id + 1 + 2, accessory_id),
 			remote_key: RemoteKeyCharacteristic::new(id + 1 + 3, accessory_id),
 			sleep_discovery_mode: SleepDiscoveryModeCharacteristic::new(id + 1 + 4, accessory_id),
-			brightness: Some(BrightnessCharacteristic::new(id + 1 + 0 + 5, accessory_id)),
+			brightness: Some(BrightnessCharacteristic::new(id + 1 + 5, accessory_id)),
 			closed_captions: Some(ClosedCaptionsCharacteristic::new(id + 1 + 1 + 5, accessory_id)),
 			display_order: Some(DisplayOrderCharacteristic::new(id + 1 + 2 + 5, accessory_id)),
 			current_media_state: Some(CurrentMediaStateCharacteristic::new(id + 1 + 3 + 5, accessory_id)),
@@ -132,21 +132,11 @@ impl HapService for TelevisionService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

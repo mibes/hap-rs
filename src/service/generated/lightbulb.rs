@@ -60,8 +60,8 @@ impl LightbulbService {
         Self {
             id,
             hap_type: HapType::Lightbulb,
-			power_state: PowerStateCharacteristic::new(id + 1 + 0, accessory_id),
-			brightness: Some(BrightnessCharacteristic::new(id + 1 + 0 + 1, accessory_id)),
+			power_state: PowerStateCharacteristic::new(id + 1, accessory_id),
+			brightness: Some(BrightnessCharacteristic::new(id + 1 + 1, accessory_id)),
 			characteristic_value_active_transition_count: Some(CharacteristicValueActiveTransitionCountCharacteristic::new(id + 1 + 1 + 1, accessory_id)),
 			characteristic_value_transition_control: Some(CharacteristicValueTransitionControlCharacteristic::new(id + 1 + 2 + 1, accessory_id)),
 			color_temperature: Some(ColorTemperatureCharacteristic::new(id + 1 + 3 + 1, accessory_id)),
@@ -116,21 +116,11 @@ impl HapService for LightbulbService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

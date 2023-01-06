@@ -45,8 +45,8 @@ impl AccessoryRuntimeInformationService {
         Self {
             id,
             hap_type: HapType::AccessoryRuntimeInformation,
-			ping: PingCharacteristic::new(id + 1 + 0, accessory_id),
-			activity_interval: Some(ActivityIntervalCharacteristic::new(id + 1 + 0 + 1, accessory_id)),
+			ping: PingCharacteristic::new(id + 1, accessory_id),
+			activity_interval: Some(ActivityIntervalCharacteristic::new(id + 1 + 1, accessory_id)),
 			heart_beat: Some(HeartBeatCharacteristic::new(id + 1 + 1 + 1, accessory_id)),
 			sleep_interval: Some(SleepIntervalCharacteristic::new(id + 1 + 2 + 1, accessory_id)),
 			..Default::default()
@@ -96,21 +96,11 @@ impl HapService for AccessoryRuntimeInformationService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

@@ -48,8 +48,8 @@ impl SpeakerService {
         Self {
             id,
             hap_type: HapType::Speaker,
-			mute: MuteCharacteristic::new(id + 1 + 0, accessory_id),
-			active: Some(ActiveCharacteristic::new(id + 1 + 0 + 1, accessory_id)),
+			mute: MuteCharacteristic::new(id + 1, accessory_id),
+			active: Some(ActiveCharacteristic::new(id + 1 + 1, accessory_id)),
 			volume: Some(VolumeCharacteristic::new(id + 1 + 1 + 1, accessory_id)),
 			volume_control_type: Some(VolumeControlTypeCharacteristic::new(id + 1 + 2 + 1, accessory_id)),
 			volume_selector: Some(VolumeSelectorCharacteristic::new(id + 1 + 3 + 1, accessory_id)),
@@ -100,21 +100,11 @@ impl HapService for SpeakerService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

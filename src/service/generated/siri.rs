@@ -54,8 +54,8 @@ impl SiriService {
         Self {
             id,
             hap_type: HapType::Siri,
-			siri_input_type: SiriInputTypeCharacteristic::new(id + 1 + 0, accessory_id),
-			multifunction_button: Some(MultifunctionButtonCharacteristic::new(id + 1 + 0 + 1, accessory_id)),
+			siri_input_type: SiriInputTypeCharacteristic::new(id + 1, accessory_id),
+			multifunction_button: Some(MultifunctionButtonCharacteristic::new(id + 1 + 1, accessory_id)),
 			siri_enable: Some(SiriEnableCharacteristic::new(id + 1 + 1 + 1, accessory_id)),
 			siri_engine_version: Some(SiriEngineVersionCharacteristic::new(id + 1 + 2 + 1, accessory_id)),
 			siri_light_on_use: Some(SiriLightOnUseCharacteristic::new(id + 1 + 3 + 1, accessory_id)),
@@ -108,21 +108,11 @@ impl HapService for SiriService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

@@ -54,9 +54,9 @@ impl CameraOperatingModeService {
         Self {
             id,
             hap_type: HapType::CameraOperatingMode,
-			event_snapshots_active: EventSnapshotsActiveCharacteristic::new(id + 1 + 0, accessory_id),
+			event_snapshots_active: EventSnapshotsActiveCharacteristic::new(id + 1, accessory_id),
 			homekit_camera_active: HomekitCameraActiveCharacteristic::new(id + 1 + 1, accessory_id),
-			camera_operating_mode_indicator: Some(CameraOperatingModeIndicatorCharacteristic::new(id + 1 + 0 + 2, accessory_id)),
+			camera_operating_mode_indicator: Some(CameraOperatingModeIndicatorCharacteristic::new(id + 1 + 2, accessory_id)),
 			manually_disabled: Some(ManuallyDisabledCharacteristic::new(id + 1 + 1 + 2, accessory_id)),
 			night_vision: Some(NightVisionCharacteristic::new(id + 1 + 2 + 2, accessory_id)),
 			periodic_snapshots_active: Some(PeriodicSnapshotsActiveCharacteristic::new(id + 1 + 3 + 2, accessory_id)),
@@ -108,21 +108,11 @@ impl HapService for CameraOperatingModeService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

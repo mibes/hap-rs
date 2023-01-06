@@ -51,10 +51,10 @@ impl IrrigationSystemService {
         Self {
             id,
             hap_type: HapType::IrrigationSystem,
-			active: ActiveCharacteristic::new(id + 1 + 0, accessory_id),
+			active: ActiveCharacteristic::new(id + 1, accessory_id),
 			program_mode: ProgramModeCharacteristic::new(id + 1 + 1, accessory_id),
 			in_use: InUseCharacteristic::new(id + 1 + 2, accessory_id),
-			remaining_duration: Some(RemainingDurationCharacteristic::new(id + 1 + 0 + 3, accessory_id)),
+			remaining_duration: Some(RemainingDurationCharacteristic::new(id + 1 + 3, accessory_id)),
 			name: Some(NameCharacteristic::new(id + 1 + 1 + 3, accessory_id)),
 			status_fault: Some(StatusFaultCharacteristic::new(id + 1 + 2 + 3, accessory_id)),
 			..Default::default()
@@ -104,21 +104,11 @@ impl HapService for IrrigationSystemService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

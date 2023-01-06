@@ -26,17 +26,13 @@ use crate::{
                 pair_setup::PairSetup,
                 pair_verify::PairVerify,
                 pairings::Pairings,
-                HandlerExt,
-                JsonHandler,
-                TlvHandler,
+                HandlerExt, JsonHandler, TlvHandler,
             },
-            status_response,
-            EventObject,
+            status_response, EventObject,
         },
         tcp::{EncryptedStream, Session, StreamWrapper},
     },
-    Error,
-    Result,
+    Error, Result,
 };
 
 struct Handlers {
@@ -123,7 +119,7 @@ impl Service<Request<Body>> for Api {
 
         let fut = async move {
             match handler.take() {
-                Some(handler) =>
+                Some(handler) => {
                     handler
                         .lock()
                         .await
@@ -137,7 +133,8 @@ impl Service<Request<Body>> for Api {
                             accessory_database,
                             event_emitter,
                         )
-                        .await,
+                        .await
+                },
                 None => future::ready(status_response(StatusCode::NOT_FOUND)).await,
             }
         }
@@ -221,29 +218,26 @@ impl Server {
                     let event_subscriptions_ = event_subscriptions.clone();
                     let stream_outgoing_ = stream_outgoing.clone();
                     async move {
-                        match *event {
-                            Event::CharacteristicValueChanged { aid, iid, ref value } => {
-                                let mut dropped_subscriptions = vec![];
-                                for (i, &(s_aid, s_iid)) in event_subscriptions_.lock().await.iter().enumerate() {
-                                    if s_aid == aid && s_iid == iid {
-                                        let event = EventObject {
-                                            aid,
-                                            iid,
-                                            value: value.clone(),
-                                        };
-                                        let event_res =
-                                            event_response(vec![event]).expect("couldn't create event response");
-                                        if stream_outgoing_.unbounded_send(event_res).is_err() {
-                                            dropped_subscriptions.push(i);
-                                        }
+                        if let Event::CharacteristicValueChanged { aid, iid, ref value } = *event {
+                            let mut dropped_subscriptions = vec![];
+                            for (i, &(s_aid, s_iid)) in event_subscriptions_.lock().await.iter().enumerate() {
+                                if s_aid == aid && s_iid == iid {
+                                    let event = EventObject {
+                                        aid,
+                                        iid,
+                                        value: value.clone(),
+                                    };
+                                    let event_res =
+                                        event_response(vec![event]).expect("couldn't create event response");
+                                    if stream_outgoing_.unbounded_send(event_res).is_err() {
+                                        dropped_subscriptions.push(i);
                                     }
                                 }
-                                let mut ev = event_subscriptions_.lock().await;
-                                for s in dropped_subscriptions {
-                                    ev.remove(s);
-                                }
-                            },
-                            _ => {},
+                            }
+                            let mut ev = event_subscriptions_.lock().await;
+                            for s in dropped_subscriptions {
+                                ev.remove(s);
+                            }
                         }
                     }
                     .boxed()

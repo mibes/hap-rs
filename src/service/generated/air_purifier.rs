@@ -54,10 +54,10 @@ impl AirPurifierService {
         Self {
             id,
             hap_type: HapType::AirPurifier,
-			active: ActiveCharacteristic::new(id + 1 + 0, accessory_id),
+			active: ActiveCharacteristic::new(id + 1, accessory_id),
 			current_air_purifier_state: CurrentAirPurifierStateCharacteristic::new(id + 1 + 1, accessory_id),
 			target_air_purifier_state: TargetAirPurifierStateCharacteristic::new(id + 1 + 2, accessory_id),
-			lock_physical_controls: Some(LockPhysicalControlsCharacteristic::new(id + 1 + 0 + 3, accessory_id)),
+			lock_physical_controls: Some(LockPhysicalControlsCharacteristic::new(id + 1 + 3, accessory_id)),
 			name: Some(NameCharacteristic::new(id + 1 + 1 + 3, accessory_id)),
 			rotation_speed: Some(RotationSpeedCharacteristic::new(id + 1 + 2 + 3, accessory_id)),
 			swing_mode: Some(SwingModeCharacteristic::new(id + 1 + 3 + 3, accessory_id)),
@@ -108,21 +108,11 @@ impl HapService for AirPurifierService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

@@ -1,4 +1,4 @@
-use tokio;
+
 
 use hap::{
     accessory::{bridge::BridgeAccessory, lightbulb::LightbulbAccessory, AccessoryCategory, AccessoryInformation},
@@ -35,8 +35,7 @@ async fn main() -> Result<()> {
         .power_state
         .on_update(Some(|current_val: &bool, new_val: &bool| {
             println!(
-                "Lightbulb 1: power_state characteristic updated from {} to {}",
-                current_val, new_val
+                "Lightbulb 1: power_state characteristic updated from {current_val} to {new_val}"
             );
             Ok(())
         }));
@@ -45,8 +44,7 @@ async fn main() -> Result<()> {
         .power_state
         .on_update(Some(|current_val: &bool, new_val: &bool| {
             println!(
-                "Lightbulb 2: power_state characteristic updated from {} to {}",
-                current_val, new_val
+                "Lightbulb 2: power_state characteristic updated from {current_val} to {new_val}"
             );
             Ok(())
         }));
@@ -55,8 +53,7 @@ async fn main() -> Result<()> {
         .power_state
         .on_update(Some(|current_val: &bool, new_val: &bool| {
             println!(
-                "Lightbulb 3: power_state characteristic updated from {} to {}",
-                current_val, new_val
+                "Lightbulb 3: power_state characteristic updated from {current_val} to {new_val}"
             );
             Ok(())
         }));

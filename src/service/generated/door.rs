@@ -51,10 +51,10 @@ impl DoorService {
         Self {
             id,
             hap_type: HapType::Door,
-			current_position: CurrentPositionCharacteristic::new(id + 1 + 0, accessory_id),
+			current_position: CurrentPositionCharacteristic::new(id + 1, accessory_id),
 			position_state: PositionStateCharacteristic::new(id + 1 + 1, accessory_id),
 			target_position: TargetPositionCharacteristic::new(id + 1 + 2, accessory_id),
-			name: Some(NameCharacteristic::new(id + 1 + 0 + 3, accessory_id)),
+			name: Some(NameCharacteristic::new(id + 1 + 3, accessory_id)),
 			obstruction_detected: Some(ObstructionDetectedCharacteristic::new(id + 1 + 1 + 3, accessory_id)),
 			hold_position: Some(HoldPositionCharacteristic::new(id + 1 + 2 + 3, accessory_id)),
 			..Default::default()
@@ -104,21 +104,11 @@ impl HapService for DoorService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

@@ -42,7 +42,7 @@ impl CloudRelayService {
         Self {
             id,
             hap_type: HapType::CloudRelay,
-			cloud_relay_control_point: CloudRelayControlPointCharacteristic::new(id + 1 + 0, accessory_id),
+			cloud_relay_control_point: CloudRelayControlPointCharacteristic::new(id + 1, accessory_id),
 			cloud_relay_current_state: CloudRelayCurrentStateCharacteristic::new(id + 1 + 1, accessory_id),
 			cloud_relay_enable_status: CloudRelayEnableStatusCharacteristic::new(id + 1 + 2, accessory_id),
 			..Default::default()
@@ -92,21 +92,11 @@ impl HapService for CloudRelayService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

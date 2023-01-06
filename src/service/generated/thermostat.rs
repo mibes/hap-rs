@@ -63,12 +63,12 @@ impl ThermostatService {
         Self {
             id,
             hap_type: HapType::Thermostat,
-			current_heating_cooling_state: CurrentHeatingCoolingStateCharacteristic::new(id + 1 + 0, accessory_id),
+			current_heating_cooling_state: CurrentHeatingCoolingStateCharacteristic::new(id + 1, accessory_id),
 			target_heating_cooling_state: TargetHeatingCoolingStateCharacteristic::new(id + 1 + 1, accessory_id),
 			current_temperature: CurrentTemperatureCharacteristic::new(id + 1 + 2, accessory_id),
 			target_temperature: TargetTemperatureCharacteristic::new(id + 1 + 3, accessory_id),
 			temperature_display_units: TemperatureDisplayUnitsCharacteristic::new(id + 1 + 4, accessory_id),
-			name: Some(NameCharacteristic::new(id + 1 + 0 + 5, accessory_id)),
+			name: Some(NameCharacteristic::new(id + 1 + 5, accessory_id)),
 			current_relative_humidity: Some(CurrentRelativeHumidityCharacteristic::new(id + 1 + 1 + 5, accessory_id)),
 			target_relative_humidity: Some(TargetRelativeHumidityCharacteristic::new(id + 1 + 2 + 5, accessory_id)),
 			cooling_threshold_temperature: Some(CoolingThresholdTemperatureCharacteristic::new(id + 1 + 3 + 5, accessory_id)),
@@ -120,21 +120,11 @@ impl HapService for ThermostatService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

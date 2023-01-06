@@ -29,9 +29,9 @@ impl FileStorage {
 
             let dir_path_str = dir_path.to_str().expect("couldn't stringify current_dir");
             // create subdirectory for pairings
-            fs::create_dir_all(&format!("{}/pairings", dir_path_str))?;
+            fs::create_dir_all(format!("{dir_path_str}/pairings"))?;
             // create subdirectory for custom byte storage
-            fs::create_dir_all(&format!("{}/misc", dir_path_str))?;
+            fs::create_dir_all(format!("{dir_path_str}/misc"))?;
 
             Ok(dir_path)
         })
@@ -45,7 +45,7 @@ impl FileStorage {
         let current_dir =
             spawn_blocking(move || -> Result<PathBuf> { env::current_dir().map_err(Error::from) }).await??;
         let current_dir = current_dir.to_str().expect("couldn't stringify current_dir");
-        let data_path = format!("{}/data", current_dir);
+        let data_path = format!("{current_dir}/data");
 
         Self::new(&data_path).await
     }
@@ -176,7 +176,7 @@ impl Storage for FileStorage {
     async fn delete_aid_cache(&mut self) -> Result<()> { self.remove_file("aid_cache.json").await }
 
     async fn load_pairing(&self, id: &Uuid) -> Result<Pairing> {
-        let key = format!("pairings/{}.json", id.to_string());
+        let key = format!("pairings/{id}.json");
         let pairing_bytes = self.read_bytes(&key).await?;
 
         let pairing = Pairing::from_bytes(&pairing_bytes)?;
@@ -187,13 +187,13 @@ impl Storage for FileStorage {
     }
 
     async fn save_pairing(&mut self, pairing: &Pairing) -> Result<()> {
-        let key = format!("pairings/{}.json", pairing.id.to_string());
+        let key = format!("pairings/{}.json", pairing.id);
         let pairing_bytes = pairing.as_bytes()?;
         self.write_bytes(&key, pairing_bytes).await
     }
 
     async fn delete_pairing(&mut self, id: &Uuid) -> Result<()> {
-        let key = format!("pairings/{}.json", id.to_string());
+        let key = format!("pairings/{id}.json");
         self.remove_file(&key).await
     }
 
@@ -219,16 +219,16 @@ impl Storage for FileStorage {
     }
 
     async fn load_bytes(&self, key: &str) -> Result<Vec<u8>> {
-        let bytes = self.read_bytes(&format!("misc/{}", key)).await?;
+        let bytes = self.read_bytes(&format!("misc/{key}")).await?;
 
         Ok(bytes)
     }
 
     async fn save_bytes(&mut self, key: &str, value: &[u8]) -> Result<()> {
-        self.write_bytes(&format!("misc/{}", key), value.to_vec()).await
+        self.write_bytes(&format!("misc/{key}"), value.to_vec()).await
     }
 
-    async fn delete_bytes(&mut self, key: &str) -> Result<()> { self.remove_file(&format!("misc/{}", key)).await }
+    async fn delete_bytes(&mut self, key: &str) -> Result<()> { self.remove_file(&format!("misc/{key}")).await }
 }
 
 #[cfg(test)]

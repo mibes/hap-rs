@@ -57,8 +57,8 @@ impl FanV2Service {
         Self {
             id,
             hap_type: HapType::FanV2,
-			active: ActiveCharacteristic::new(id + 1 + 0, accessory_id),
-			current_fan_state: Some(CurrentFanStateCharacteristic::new(id + 1 + 0 + 1, accessory_id)),
+			active: ActiveCharacteristic::new(id + 1, accessory_id),
+			current_fan_state: Some(CurrentFanStateCharacteristic::new(id + 1 + 1, accessory_id)),
 			target_fan_state: Some(TargetFanStateCharacteristic::new(id + 1 + 1 + 1, accessory_id)),
 			lock_physical_controls: Some(LockPhysicalControlsCharacteristic::new(id + 1 + 2 + 1, accessory_id)),
 			name: Some(NameCharacteristic::new(id + 1 + 3 + 1, accessory_id)),
@@ -112,21 +112,11 @@ impl HapService for FanV2Service {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

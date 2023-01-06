@@ -81,11 +81,11 @@ impl ThreadTransportService {
         Self {
             id,
             hap_type: HapType::ThreadTransport,
-			current_transport: CurrentTransportCharacteristic::new(id + 1 + 0, accessory_id),
+			current_transport: CurrentTransportCharacteristic::new(id + 1, accessory_id),
 			thread_control_point: ThreadControlPointCharacteristic::new(id + 1 + 1, accessory_id),
 			thread_node_capabilities: ThreadNodeCapabilitiesCharacteristic::new(id + 1 + 2, accessory_id),
 			thread_status: ThreadStatusCharacteristic::new(id + 1 + 3, accessory_id),
-			cca_energy_detect_threshold: Some(CcaEnergyDetectThresholdCharacteristic::new(id + 1 + 0 + 4, accessory_id)),
+			cca_energy_detect_threshold: Some(CcaEnergyDetectThresholdCharacteristic::new(id + 1 + 4, accessory_id)),
 			cca_signal_detect_threshold: Some(CcaSignalDetectThresholdCharacteristic::new(id + 1 + 1 + 4, accessory_id)),
 			event_retransmission_maximum: Some(EventRetransmissionMaximumCharacteristic::new(id + 1 + 2 + 4, accessory_id)),
 			event_transmission_counters: Some(EventTransmissionCountersCharacteristic::new(id + 1 + 3 + 4, accessory_id)),
@@ -144,21 +144,11 @@ impl HapService for ThreadTransportService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {

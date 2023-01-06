@@ -1,21 +1,19 @@
-use tokio;
-
 use hap::{
     accessory::{air_purifier::AirPurifierAccessory, AccessoryCategory, AccessoryInformation},
     server::{IpServer, Server},
     storage::{FileStorage, Storage},
-    Config,
-    MacAddress,
-    Pin,
-    Result,
+    Config, MacAddress, Pin, Result,
 };
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let air_purifier = AirPurifierAccessory::new(1, AccessoryInformation {
-        name: "Acme Air Purifier".into(),
-        ..Default::default()
-    })?;
+    let air_purifier = AirPurifierAccessory::new(
+        1,
+        AccessoryInformation {
+            name: "Acme Air Purifier".into(),
+            ..Default::default()
+        },
+    )?;
 
     let mut storage = FileStorage::current_dir().await?;
 

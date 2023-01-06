@@ -15,7 +15,9 @@ use crate::{
 pub struct Pairings;
 
 impl Pairings {
-    pub fn new() -> Pairings { Pairings }
+    pub fn new() -> Pairings {
+        Pairings
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -64,13 +66,13 @@ impl TlvHandlerExt for Pairings {
                     x if x == HandlerNumber::Add as u8 => {
                         let pairing_id = decoded
                             .remove(&(Type::Identifier as u8))
-                            .ok_or(tlv::ErrorContainer::new(StepNumber::Res as u8, tlv::Error::Unknown))?;
+                            .ok_or_else(|| tlv::ErrorContainer::new(StepNumber::Res as u8, tlv::Error::Unknown))?;
                         let ltpk = decoded
                             .remove(&(Type::PublicKey as u8))
-                            .ok_or(tlv::ErrorContainer::new(StepNumber::Res as u8, tlv::Error::Unknown))?;
+                            .ok_or_else(|| tlv::ErrorContainer::new(StepNumber::Res as u8, tlv::Error::Unknown))?;
                         let perms = decoded
                             .remove(&(Type::Permissions as u8))
-                            .ok_or(tlv::ErrorContainer::new(StepNumber::Res as u8, tlv::Error::Unknown))?;
+                            .ok_or_else(|| tlv::ErrorContainer::new(StepNumber::Res as u8, tlv::Error::Unknown))?;
                         let permissions = Permissions::from_byte(perms[0])
                             .map_err(|_| tlv::ErrorContainer::new(StepNumber::Res as u8, tlv::Error::Unknown))?;
                         Ok(HandlerType::Add {
@@ -82,7 +84,7 @@ impl TlvHandlerExt for Pairings {
                     x if x == HandlerNumber::Remove as u8 => {
                         let pairing_id = decoded
                             .remove(&(Type::Identifier as u8))
-                            .ok_or(tlv::ErrorContainer::new(StepNumber::Res as u8, tlv::Error::Unknown))?;
+                            .ok_or_else(|| tlv::ErrorContainer::new(StepNumber::Res as u8, tlv::Error::Unknown))?;
                         Ok(HandlerType::Remove { pairing_id })
                     },
                     x if x == HandlerNumber::List as u8 => Ok(HandlerType::List),

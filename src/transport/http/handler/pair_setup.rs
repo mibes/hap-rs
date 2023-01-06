@@ -81,25 +81,18 @@ impl TlvHandlerExt for PairSetup {
                 Some(method) => match method[0] {
                     x if x == StepNumber::SrpStartRequest as u8 => Ok(Step::Start),
                     x if x == StepNumber::SrpVerifyRequest as u8 => {
-                        let a_pub = decoded
-                            .remove(&(Type::PublicKey as u8))
-                            .ok_or(tlv::ErrorContainer::new(
-                                StepNumber::SrpVerifyResponse as u8,
-                                tlv::Error::Unknown,
-                            ))?;
-                        let a_proof = decoded.remove(&(Type::Proof as u8)).ok_or(tlv::ErrorContainer::new(
-                            StepNumber::SrpVerifyResponse as u8,
-                            tlv::Error::Unknown,
-                        ))?;
+                        let a_pub = decoded.remove(&(Type::PublicKey as u8)).ok_or_else(|| {
+                            tlv::ErrorContainer::new(StepNumber::SrpVerifyResponse as u8, tlv::Error::Unknown)
+                        })?;
+                        let a_proof = decoded.remove(&(Type::Proof as u8)).ok_or_else(|| {
+                            tlv::ErrorContainer::new(StepNumber::SrpVerifyResponse as u8, tlv::Error::Unknown)
+                        })?;
                         Ok(Step::Verify { a_pub, a_proof })
                     },
                     x if x == StepNumber::ExchangeRequest as u8 => {
-                        let data = decoded
-                            .remove(&(Type::EncryptedData as u8))
-                            .ok_or(tlv::ErrorContainer::new(
-                                StepNumber::ExchangeResponse as u8,
-                                tlv::Error::Unknown,
-                            ))?;
+                        let data = decoded.remove(&(Type::EncryptedData as u8)).ok_or_else(|| {
+                            tlv::ErrorContainer::new(StepNumber::ExchangeResponse as u8, tlv::Error::Unknown)
+                        })?;
                         Ok(Step::Exchange { data })
                     },
                     _ => Err(tlv::ErrorContainer::new(StepNumber::Unknown as u8, tlv::Error::Unknown)),
@@ -182,7 +175,7 @@ async fn handle_start(handler: &mut PairSetup, config: pointer::Config) -> Resul
 
     // TODO - respect pairing flags (specification p. 35 - 7.) for split pair setup
 
-    let private_key = srp_private_key::<Sha512>(b"Pair-Setup", &config.lock().await.pin.to_string().as_bytes(), &salt); // x = H(s | H(I | ":" | P))
+    let private_key = srp_private_key::<Sha512>(b"Pair-Setup", config.lock().await.pin.to_string().as_bytes(), &salt); // x = H(s | H(I | ":" | P))
     let srp_client = SrpClient::<Sha512>::new(&private_key, &G_3072);
     let verifier = srp_client.get_password_verifier(&private_key); // v = g^x
 
@@ -290,7 +283,7 @@ async fn handle_exchange(
                 )?;
 
                 let mut device_info: Vec<u8> = Vec::new();
-                device_info.extend(&device_x);
+                device_info.extend(device_x);
                 device_info.extend(device_pairing_id);
                 device_info.extend(device_ltpk.as_bytes());
 
@@ -324,7 +317,7 @@ async fn handle_exchange(
                 let device_id = config.device_id.to_hex_string();
 
                 let mut accessory_info: Vec<u8> = Vec::new();
-                accessory_info.extend(&accessory_x);
+                accessory_info.extend(accessory_x);
                 accessory_info.extend(device_id.as_bytes());
                 accessory_info.extend(config.device_ed25519_keypair.public.as_bytes());
                 let accessory_signature = config.device_ed25519_keypair.sign(&accessory_info);
@@ -345,7 +338,7 @@ async fn handle_exchange(
                 encrypted_data.extend_from_slice(&encoded_sub_tlv);
                 let auth_tag =
                     aead.encrypt_in_place_detached(GenericArray::from_slice(&nonce), &[], &mut encrypted_data)?;
-                encrypted_data.extend(&auth_tag);
+                encrypted_data.extend(auth_tag);
 
                 event_emitter
                     .lock()
@@ -373,11 +366,11 @@ fn verify_client_proof<D: Digest>(
     group: &SrpGroup,
 ) -> Result<Vec<u8>, tlv::Error> {
     let mut dhn = D::new();
-    dhn.update(&group.n.to_bytes_be());
+    dhn.update(group.n.to_bytes_be());
     let hn = BigUint::from_bytes_be(&dhn.finalize());
 
     let mut dhg = D::new();
-    dhg.update(&group.g.to_bytes_be());
+    dhg.update(group.g.to_bytes_be());
     let hg = BigUint::from_bytes_be(&dhg.finalize());
 
     let hng = hn.bitxor(hg);
@@ -388,7 +381,7 @@ fn verify_client_proof<D: Digest>(
 
     let mut d = D::new();
     // M = H(H(N) xor H(g), H(I), s, A, B, K)
-    d.update(&hng.to_bytes_be());
+    d.update(hng.to_bytes_be());
     d.update(&hi);
     d.update(salt);
     d.update(a_pub);
@@ -465,10 +458,13 @@ mod tests {
 
         let b_proof = verify_client_proof::<Sha512>(&b_pub, &a_pub, &a_proof, &salt, &shared_secret, &G_3072).unwrap();
 
-        assert_eq!(b_proof, vec![
-            53, 222, 231, 209, 7, 123, 202, 208, 135, 119, 183, 90, 79, 154, 55, 155, 63, 56, 215, 210, 4, 20, 229,
-            119, 234, 168, 107, 137, 48, 172, 180, 244, 184, 142, 170, 120, 188, 106, 94, 135, 122, 4, 211, 21, 190,
-            26, 121, 180, 13, 192, 173, 246, 172, 223, 161, 192, 52, 251, 187, 66, 52, 170, 18, 85
-        ]);
+        assert_eq!(
+            b_proof,
+            vec![
+                53, 222, 231, 209, 7, 123, 202, 208, 135, 119, 183, 90, 79, 154, 55, 155, 63, 56, 215, 210, 4, 20, 229,
+                119, 234, 168, 107, 137, 48, 172, 180, 244, 184, 142, 170, 120, 188, 106, 94, 135, 122, 4, 211, 21,
+                190, 26, 121, 180, 13, 192, 173, 246, 172, 223, 161, 192, 52, 251, 187, 66, 52, 170, 18, 85
+            ]
+        );
     }
 }

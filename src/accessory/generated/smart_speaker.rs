@@ -47,21 +47,15 @@ impl HapAccessory for SmartSpeakerAccessory {
     }
 
     fn get_service(&self, hap_type: HapType) -> Option<&dyn HapService> {
-        for service in self.get_services() {
-            if service.get_type() == hap_type {
-                return Some(service);
-            }
-        }
-        None
+        self.get_services()
+            .into_iter()
+            .find(|&service| service.get_type() == hap_type)
     }
 
     fn get_mut_service(&mut self, hap_type: HapType) -> Option<&mut dyn HapService> {
-        for service in self.get_mut_services() {
-            if service.get_type() == hap_type {
-                return Some(service);
-            }
-        }
-        None
+        self.get_mut_services()
+            .into_iter()
+            .find(|service| service.get_type() == hap_type)
     }
 
     fn get_services(&self) -> Vec<&dyn HapService> {

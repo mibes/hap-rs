@@ -1,4 +1,4 @@
-use tokio;
+
 
 use hap::{
     accessory::{lightbulb::LightbulbAccessory, AccessoryCategory, AccessoryInformation},
@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
         .power_state
         .on_update_async(Some(|current_val: bool, new_val: bool| {
             async move {
-                println!("power_state characteristic updated from {} to {}", current_val, new_val);
+                println!("power_state characteristic updated from {current_val} to {new_val}");
                 Ok(())
             }
             .boxed()

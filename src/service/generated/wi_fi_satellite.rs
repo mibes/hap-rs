@@ -36,7 +36,7 @@ impl WiFiSatelliteService {
         Self {
             id,
             hap_type: HapType::WiFiSatellite,
-			wi_fi_satellite_status: WiFiSatelliteStatusCharacteristic::new(id + 1 + 0, accessory_id),
+			wi_fi_satellite_status: WiFiSatelliteStatusCharacteristic::new(id + 1, accessory_id),
 			..Default::default()
         }
     }
@@ -84,21 +84,11 @@ impl HapService for WiFiSatelliteService {
     }
 
     fn get_characteristic(&self, hap_type: HapType) -> Option<&dyn HapCharacteristic> {
-        for characteristic in self.get_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_characteristics().into_iter().find(|&characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_mut_characteristic(&mut self, hap_type: HapType) -> Option<&mut dyn HapCharacteristic> {
-        for characteristic in self.get_mut_characteristics() {
-            if characteristic.get_type() == hap_type {
-                return Some(characteristic);
-            }
-        }
-        None
+        self.get_mut_characteristics().into_iter().find(|characteristic| characteristic.get_type() == hap_type)
     }
 
     fn get_characteristics(&self) -> Vec<&dyn HapCharacteristic> {
